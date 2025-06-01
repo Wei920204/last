@@ -51,7 +51,7 @@ function draw() {
   Engine.update(engine); // 更新物理引擎
   strokeWeight(2);
   stroke(0);
-  
+
   // 顯示攝影機畫面
   image(video, 0, 0, width, height);
 
@@ -63,22 +63,24 @@ function draw() {
   }
   stroke(0);
 
-  // 隨機產生新的 logo 圓形
-  if (random() < 0.1) {
-    circles.push(new Circle());
+  // 只有偵測到手部時才產生新的 logo 圓形，且只會下落
+  if (hands.length > 0) {
+    if (random() < 0.1) {
+      circles.push(new Circle());
+    }
   }
-  
+
   // 顯示所有 logo 圓形，並檢查是否要移除
-  for (let i=circles.length-1; i>=0; i--) {
+  for (let i = circles.length - 1; i >= 0; i--) {
     circles[i].checkDone();
-    circles[i].update();      // 新增：更新位置與碰撞
+    circles[i].update();      // 更新位置與碰撞
     circles[i].display();
     if (circles[i].done) {
       circles[i].removeCircle();
       circles.splice(i, 1);
     }
   }
-  
+
   // 若有偵測到手部
   if (hands.length > 0) {
     let thumb = hands[0].keypoints[THUMB_TIP];
@@ -89,8 +91,8 @@ function draw() {
     circle(index.x, index.y, 10);
     bridge.bodies[0].position.x = thumb.x;
     bridge.bodies[0].position.y = thumb.y;
-    bridge.bodies[bridge.bodies.length-1].position.x = index.x;
-    bridge.bodies[bridge.bodies.length-1].position.y = index.y;
+    bridge.bodies[bridge.bodies.length - 1].position.x = index.x;
+    bridge.bodies[bridge.bodies.length - 1].position.y = index.y;
     bridge.display();
   }
 }
@@ -107,29 +109,28 @@ class Circle {
     this.y = random(height);     // 隨機 y 座標
     this.r = random(20, 40);     // 隨機半徑
     this.done = false;           // 是否完成(要移除)
-    // 加入速度向量
-    this.vx = random(-2, 2);
-    this.vy = random(-2, 2);
+    // 只會下落
+    this.vx = 0;
+    this.vy = random(2, 4);      // 固定向下速度
   }
 
   checkDone() {
     // 超出畫面就消失
     if (
       this.x + this.r < 0 || this.x - this.r > width ||
-      this.y + this.r < 0 || this.y - this.r > height
+      this.y - this.r > height
     ) {
       this.done = true;
     }
   }
 
   update() {
-    // 移動
+    // 只會下落
     this.x += this.vx;
     this.y += this.vy;
 
-    // 與障礙物碰撞反彈
+    // 與障礙物碰撞反彈（只反彈y方向）
     for (let obs of obstacles) {
-      // 檢查圓心是否在障礙物範圍內（簡單碰撞）
       let closestX = constrain(this.x, obs.x, obs.x + obs.w);
       let closestY = constrain(this.y, obs.y, obs.y + obs.h);
       let distX = this.x - closestX;
@@ -137,15 +138,9 @@ class Circle {
       let distance = sqrt(distX * distX + distY * distY);
 
       if (distance < this.r) {
-        // 根據碰撞方向反彈
-        if (abs(distX) > abs(distY)) {
-          this.vx *= -1;
-          // 避免卡住，稍微移開
-          this.x += this.vx * 2;
-        } else {
-          this.vy *= -1;
-          this.y += this.vy * 2;
-        }
+        // 只反彈y方向
+        this.vy *= -1;
+        this.y += this.vy * 2;
       }
     }
   }
