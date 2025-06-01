@@ -13,9 +13,12 @@ let circles = [];
 
 let colorPalette = ["#abcd5e", "#14976b", "#2b67af", "#62b6de", "#f589a3", "#ef562f", "#fc8405", "#f9d531"]; 
 
+let logoImg; // 新增圖片變數
+
 function preload() {
   // Load the handPose model
   handPose = ml5.handPose({maxHands: 1, flipped: true});
+  logoImg = loadImage('logo.jpg'); // 載入 logo.jpg
 }
 
 
@@ -79,4 +82,26 @@ function draw() {
 function gotHands(results) {
   // save the output to the hands variable
   hands = results;
+}
+
+class Circle {
+  constructor() {
+    this.x = random(width);
+    this.y = random(height);
+    this.r = random(20, 40);
+    this.done = false;
+  }
+
+  checkDone() {
+    // 你的判斷圓形是否消失的邏輯
+  }
+
+  display() {
+    // 用 logoImg 畫圖
+    image(logoImg, this.x - this.r, this.y - this.r, this.r * 2, this.r * 2);
+  }
+
+  removeCircle() {
+    // 你的移除邏輯
+  }
 }
