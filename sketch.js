@@ -109,7 +109,7 @@ class Circle {
     this.y = random(height);     // 隨機 y 座標
     this.r = random(20, 40);     // 隨機半徑
     this.done = false;           // 是否完成(要移除)
-    // 只會下落
+    // 初始速度：只會下落
     this.vx = 0;
     this.vy = random(2, 4);      // 固定向下速度
   }
@@ -125,11 +125,11 @@ class Circle {
   }
 
   update() {
-    // 只會下落
+    // 移動
     this.x += this.vx;
     this.y += this.vy;
 
-    // 與障礙物碰撞反彈（只反彈y方向）
+    // 與障礙物碰撞反彈（隨機方向）
     for (let obs of obstacles) {
       let closestX = constrain(this.x, obs.x, obs.x + obs.w);
       let closestY = constrain(this.y, obs.y, obs.y + obs.h);
@@ -138,8 +138,13 @@ class Circle {
       let distance = sqrt(distX * distX + distY * distY);
 
       if (distance < this.r) {
-        // 只反彈y方向
-        this.vy *= -1;
+        // 產生隨機反彈角度
+        let angle = random(TWO_PI);
+        let speed = random(2, 4);
+        this.vx = cos(angle) * speed;
+        this.vy = sin(angle) * speed;
+        // 避免卡住，稍微移開
+        this.x += this.vx * 2;
         this.y += this.vy * 2;
       }
     }
